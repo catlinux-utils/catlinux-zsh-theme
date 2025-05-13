@@ -47,7 +47,7 @@ _prompt_agnoster_end() {
 
 _prompt_agnoster_status() {
   local segment=''
-  if (( RETVAL )) segment+=' %F{red}'${RETVAL}
+  if (( RETVAL )) segment+=' %F{red}✘'
   if (( EUID == 0 )) segment+=' %F{yellow}⚡'
   if (( ${#jobstates} )) segment+=' %F{cyan}⚙'
   if [[ -n ${VIRTUAL_ENV_PROMPT} ]]; then
