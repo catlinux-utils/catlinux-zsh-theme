@@ -42,11 +42,8 @@ _prompt_agnoster_status() {
   elif [[ -n ${VIRTUAL_ENV} ]]; then
     segment+=' %F{cyan}'${VIRTUAL_ENV:t}
   fi
-  if [[ -n ${SSH_TTY} ]]; then
-    segment+=' %F{%(!.yellow.default)}%n@%m'
-  else
-    segment+=' %F{%(!.yellow.default)}%n@%m'
-  fi  if [[ -n ${segment} ]]; then
+  segment+=' %F{%(!.yellow.default)}%n@%m'
+  if [[ -n ${segment} ]]; then
     _prompt_agnoster_segment black ${segment}' '
   fi
 }
