@@ -28,6 +28,19 @@ _prompt_agnoster_standout_segment() {
   CURRENT_BG=${1}
 }
 
+_prompt_agnoster_custom_segment() {
+  local bg_color=$1
+  local fg_color=$2
+  local content=$3
+  print -n "%K{${bg_color}}"
+  if [[ -n ${CURRENT_BG} ]]; then
+    print -n "%F{${CURRENT_BG}}"
+  fi
+  print -n "%F{${fg_color}}"
+  print -n " ${content} "
+  CURRENT_BG=${bg_color}
+}
+
 _prompt_agnoster_end() {
   print -n "%k%F{${CURRENT_BG}}%f "
 }
@@ -51,7 +64,7 @@ _prompt_agnoster_status() {
 _prompt_agnoster_pwd() {
   local current_dir
   prompt-pwd current_dir
-  _prompt_agnoster_segment "#02A5F0" ' '${current_dir}' '
+  _prompt_agnoster_custom_segment "black" "#02A5F0" "${current_dir}"
 }
 
 _prompt_agnoster_git() {
