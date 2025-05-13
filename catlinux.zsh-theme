@@ -64,7 +64,7 @@ typeset -g VIRTUAL_ENV_DISABLE_PROMPT=1
 
 setopt nopromptbang prompt{cr,percent,sp,subst}
 
-zstyle ':zim:prompt-pwd:fish-style' dir-length 1
+#zstyle ':zim:prompt-pwd:fish-style' dir-length 1 #disable
 
 typeset -gA git_info
 if (( ${+functions[git-info]} )); then
