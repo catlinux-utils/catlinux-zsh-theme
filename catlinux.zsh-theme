@@ -33,7 +33,7 @@ _prompt_agnoster_end() {
 }
 
 _prompt_agnoster_status() {
-  local segment=
+  local segment='%F{%(!.yellow.default)}%n@%m'
   #if (( RETVAL )) segment+=' %F{red}'${RETVAL} //disable error code
   if (( EUID == 0 )) segment+=' %F{yellow}⚡'
   if (( ${#jobstates} )) segment+=' %F{cyan}⚙'
