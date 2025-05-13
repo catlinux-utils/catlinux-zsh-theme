@@ -34,7 +34,7 @@ _prompt_agnoster_end() {
 
 _prompt_agnoster_status() {
   local segment=
-  if (( RETVAL )) segment+=' %F{red}'${RETVAL}
+  #if (( RETVAL )) segment+=' %F{red}'${RETVAL} //disable error code
   if (( EUID == 0 )) segment+=' %F{yellow}⚡'
   if (( ${#jobstates} )) segment+=' %F{cyan}⚙'
   if [[ -n ${VIRTUAL_ENV_PROMPT} ]]; then
@@ -77,7 +77,7 @@ if (( ${+functions[git-info]} )); then
   zstyle ':zim:git-info:unindexed' format ' ●'
   zstyle ':zim:git-info:action' format '  %s'
   zstyle ':zim:git-info:clean' format 'green'
-  zstyle ':zim:git-info:dirty' format 'yellow'
+  zstyle ':zim:git-info:dirty' format '#77ff00'
   zstyle ':zim:git-info:keys' format \
       'prompt' '%b%c%A%B%S%i%I%s' \
       'color' '%C%D'
