@@ -51,7 +51,7 @@ _prompt_agnoster_status() {
 _prompt_agnoster_pwd() {
   local current_dir
   prompt-pwd current_dir
-  _prompt_agnoster_standout_segment blue ' '${current_dir}' '
+  _prompt_agnoster_standout_segment black ' '${current_dir}' '
 }
 
 _prompt_agnoster_git() {
@@ -64,7 +64,7 @@ typeset -g VIRTUAL_ENV_DISABLE_PROMPT=1
 
 setopt nopromptbang prompt{cr,percent,sp,subst}
 
-#zstyle ':zim:prompt-pwd:fish-style' dir-length 1 #disable
+zstyle ':zim:prompt-pwd:fish-style' dir-length 0
 
 typeset -gA git_info
 if (( ${+functions[git-info]} )); then
@@ -74,7 +74,7 @@ if (( ${+functions[git-info]} )); then
   zstyle ':zim:git-info:behind' format ' ↓%B'
   zstyle ':zim:git-info:stashed' format ' ⍟%S'
   zstyle ':zim:git-info:indexed' format ' ✚'
-  zstyle ':zim:git-info:unindexed' format ' ●'
+  zstyle ':zim:git-info:unindexed' format ' \uf044'
   zstyle ':zim:git-info:action' format '  %s'
   zstyle ':zim:git-info:clean' format 'green'
   zstyle ':zim:git-info:dirty' format '#77ff00'
