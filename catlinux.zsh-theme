@@ -48,7 +48,7 @@ _prompt_agnoster_status() {
   fi
 }
 
-_prompt_agnoster_pwd() {
+_prompt_agnoster_segment() {
   local current_dir
   prompt-pwd current_dir
   _prompt_agnoster_standout_segment "#02A5F0" ' '${current_dir}' '
