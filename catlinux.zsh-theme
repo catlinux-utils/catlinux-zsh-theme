@@ -63,7 +63,7 @@ _prompt_agnoster_status() {
 _prompt_agnoster_pwd() {
   local current_dir
   prompt-pwd current_dir
-  _prompt_agnoster_custom_segment "black" "#02A5F0" "${current_dir}"
+  _prompt_agnoster_custom_segment "transparent" "#02A5F0" "${current_dir}"
 }
 
 _prompt_agnoster_git() {
