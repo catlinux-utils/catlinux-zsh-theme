@@ -57,10 +57,9 @@ _prompt_agnoster_status() {
   fi
   segment+=' %F{%(!.yellow.default)}%n@%m'
   if [[ -n ${segment} ]]; then
-    _prompt_agnoster_segment black ${segment}' '
+    _prompt_agnoster_segment transparent ${segment}' '
   fi
 }
-
 _prompt_agnoster_pwd() {
   local current_dir
   prompt-pwd current_dir
