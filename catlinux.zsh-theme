@@ -137,15 +137,6 @@ _update_git_info() {
     done <<<"$porcelain"
   fi
 
-  local stashed=0
-  if git rev-parse --verify refs/stash >/dev/null 2>&1; then
-    local stash_count
-    stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
-    if (( stash_count )); then
-      stashed=1
-    fi
-  fi
-
   local color="green"
   if (( indexed )); then
     color="#77ff00"
@@ -160,22 +151,12 @@ _update_git_info() {
     if (( unindexed )); then prompt+=" ~"; fi
     if (( ahead > 0 )); then prompt+=" ahead:${ahead}"; fi
     if (( behind > 0 )); then prompt+=" behind:${behind}"; fi
-    if (( stashed )); then
-      local stash_n
-      stash_n=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
-      prompt+=" stash:${stash_n}"
-    fi
   else
     prompt=" ${branch}"
     if (( indexed )); then prompt+=" ✚"; fi
     if (( unindexed )); then prompt+=" \uf044"; fi
     if (( ahead > 0 )); then prompt+=" ↑${ahead}"; fi
     if (( behind > 0 )); then prompt+=" ↓${behind}"; fi
-    if (( stashed )); then
-      local stash_n
-      stash_n=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
-      prompt+=" ⍟${stash_n}"
-    fi
   fi
 
   git_info=(
