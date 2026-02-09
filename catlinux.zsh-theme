@@ -1,9 +1,5 @@
-# vim:et sts=2 sw=2 ft=zsh
-#
 # Catlinux fork of Agnoster from zim
 
-# Detect terminal capability and fall back to a simple prompt for
-# plain TTYs or 'dumb' terminals (no Powerline glyphs / limited colors).
 CATLINUX_FANCY_PROMPT=0
 if [[ -t 1 ]] && [[ -n ${TERM} ]] && [[ ${TERM} != dumb ]]; then
   colors=$(tput colors 2>/dev/null || echo 0)
@@ -11,8 +7,6 @@ if [[ -t 1 ]] && [[ -n ${TERM} ]] && [[ ${TERM} != dumb ]]; then
     CATLINUX_FANCY_PROMPT=1
   fi
 fi
-
-# If we don't have a fancy prompt, render in plain mode via checks below
 
 _prompt_agnoster_main() {
   RETVAL=${?}
@@ -26,7 +20,6 @@ _prompt_agnoster_main() {
 
 _prompt_agnoster_segment() {
   if (( CATLINUX_FANCY_PROMPT == 0 )); then
-    # Plain mode: no background colors, no powerline glyphs. Use foreground only
     if [[ -n ${CURRENT_BG} ]]; then
       print -n "%F{white}|%f "
     fi
@@ -112,7 +105,6 @@ _prompt_agnoster_git() {
 
 typeset -g VIRTUAL_ENV_DISABLE_PROMPT=1
 
-setopt nopromptbang prompt{cr,percent,sp,subst}
 setopt nopromptbang prompt{cr,percent,sp,subst}
 
 typeset -gA git_info
