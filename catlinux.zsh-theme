@@ -1,9 +1,9 @@
 # Catlinux fork of Agnoster from zim
 
-CATLINUX_FANCY_PROMPT=0
-if [[ -t 1 ]] && [[ -n ${TERM} ]] && [[ ${TERM} != dumb ]]; then
+if [[ -t 1 ]] && [[ -n ${TERM} ]] && [[ ${TERM} != dumb ]] && [[ ${TERM} != linux ]]; then
   colors=$(tput colors 2>/dev/null || echo 0)
-  if (( colors >= 8 )); then
+  locale_val=${LC_ALL:-${LC_CTYPE:-${LANG:-}}}
+  if [[ -n ${locale_val} && ( ${locale_val} == *UTF-8* || ${locale_val} == *utf8* ) ]] && (( colors >= 8 )); then
     CATLINUX_FANCY_PROMPT=1
   fi
 fi
