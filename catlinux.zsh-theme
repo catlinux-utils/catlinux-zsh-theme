@@ -4,7 +4,6 @@
 #
 
 _prompt_agnoster_main() {
-  # This runs in a subshell
   RETVAL=${?}
   CURRENT_BG=
 
@@ -62,41 +61,85 @@ _prompt_agnoster_status() {
 }
 
 _prompt_agnoster_pwd() {
-  local current_dir
-  prompt-pwd current_dir
-  _prompt_agnoster_custom_segment "black" "#02A5F0" "${current_dir}"
+  _prompt_agnoster_custom_segment "black" "#02A5F0" ' %~ '
 }
 
 _prompt_agnoster_git() {
   if [[ -n ${git_info} ]]; then
-    _prompt_agnoster_standout_segment ${git_info[color]} ' '${(e)git_info[prompt]}' '
+    _prompt_agnoster_standout_segment ${git_info[color]} $'\u2009'${(e)git_info[prompt]}$'\u2009'
   fi
 }
 
 typeset -g VIRTUAL_ENV_DISABLE_PROMPT=1
 
 setopt nopromptbang prompt{cr,percent,sp,subst}
-
-zstyle ':zim:prompt-pwd:fish-style' dir-length 0
+setopt nopromptbang prompt{cr,percent,sp,subst}
 
 typeset -gA git_info
-if (( ${+functions[git-info]} )); then
-  zstyle ':zim:git-info:branch' format ' %b'
-  zstyle ':zim:git-info:commit' format '➦ %c'
-  zstyle ':zim:git-info:ahead' format ' ↑%A'
-  zstyle ':zim:git-info:behind' format ' ↓%B'
-  zstyle ':zim:git-info:stashed' format ' ⍟%S'
-  zstyle ':zim:git-info:indexed' format ' ✚'
-  zstyle ':zim:git-info:unindexed' format ' \uf044'
-  zstyle ':zim:git-info:action' format '  %s'
-  zstyle ':zim:git-info:clean' format 'green'
-  zstyle ':zim:git-info:dirty' format '#77ff00'
-  zstyle ':zim:git-info:keys' format \
-      'prompt' '%b%c%A%B%S%i%I%s' \
-      'color' '%C%D'
 
-  autoload -Uz add-zsh-hook && add-zsh-hook precmd git-info
-fi
+_update_git_info() {
+  git_info=()
+
+  if ! command -v git >/dev/null 2>&1 || ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    return 0
+  fi
+
+  local branch
+  branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null) || branch=$(git rev-parse --short HEAD 2>/dev/null)
+
+  local ahead=0 behind=0
+  if git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+    local cnt
+    cnt=$(git rev-list --left-right --count @{u}...HEAD 2>/dev/null) || cnt="0\t0"
+    behind=${${(s.\t.)cnt}[1]}
+    ahead=${${(s.\t.)cnt}[2]}
+  fi
+
+  local porcelain indexed=0 unindexed=0
+  porcelain=$(git status --porcelain 2>/dev/null)
+  if [[ -n $porcelain ]]; then
+    while IFS= read -r line; do
+      local x=${line[1]} y=${line[2]}
+      if [[ $x != ' ' ]]; then indexed=1; fi
+      if [[ $y != ' ' ]]; then unindexed=1; fi
+    done <<<"$porcelain"
+  fi
+
+  local stashed=0
+  if git rev-parse --verify refs/stash >/dev/null 2>&1; then
+    local stash_count
+    stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+    if (( stash_count )); then
+      stashed=1
+    fi
+  fi
+
+  local color="green"
+  if (( indexed )); then
+    color="#77ff00"
+  elif (( unindexed )); then
+    color="yellow"
+  fi
+
+  local prompt
+  prompt=" ${branch}"
+  if (( indexed )); then prompt+=" ✚"; fi
+  if (( unindexed )); then prompt+=" \uf044"; fi
+  if (( ahead > 0 )); then prompt+=" ↑${ahead}"; fi
+  if (( behind > 0 )); then prompt+=" ↓${behind}"; fi
+  if (( stashed )); then
+    local stash_n
+    stash_n=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+    prompt+=" ⍟${stash_n}"
+  fi
+
+  git_info=(
+    prompt "${prompt}"
+    color "$color"
+  )
+}
+
+autoload -Uz add-zsh-hook && add-zsh-hook precmd _update_git_info
 
 PS1='$(_prompt_agnoster_main)'
 unset RPS1
