@@ -1,7 +1,18 @@
 # vim:et sts=2 sw=2 ft=zsh
 #
 # Catlinux fork of Agnoster from zim
-#
+
+# Detect terminal capability and fall back to a simple prompt for
+# plain TTYs or 'dumb' terminals (no Powerline glyphs / limited colors).
+CATLINUX_FANCY_PROMPT=0
+if [[ -t 1 ]] && [[ -n ${TERM} ]] && [[ ${TERM} != dumb ]]; then
+  colors=$(tput colors 2>/dev/null || echo 0)
+  if (( colors >= 8 )); then
+    CATLINUX_FANCY_PROMPT=1
+  fi
+fi
+
+# If we don't have a fancy prompt, render in plain mode via checks below
 
 _prompt_agnoster_main() {
   RETVAL=${?}
@@ -14,34 +25,63 @@ _prompt_agnoster_main() {
 }
 
 _prompt_agnoster_segment() {
-  print -n "%K{${1}}"
-  if [[ -n ${CURRENT_BG} ]] print -n "%F{${CURRENT_BG}}"
-  print -n ${2}
-  CURRENT_BG=${1}
+  if (( CATLINUX_FANCY_PROMPT == 0 )); then
+    # Plain mode: no background colors, no powerline glyphs. Use foreground only
+    if [[ -n ${CURRENT_BG} ]]; then
+      print -n "%F{white}|%f "
+    fi
+    print -n "%F{${1}}${2}%f "
+    CURRENT_BG=${1}
+  else
+    print -n "%K{${1}}"
+    if [[ -n ${CURRENT_BG} ]] print -n "%F{${CURRENT_BG}}"
+    print -n ${2}
+    CURRENT_BG=${1}
+  fi
 }
 
 _prompt_agnoster_standout_segment() {
-  print -n "%S%F{${1}}"
-  if [[ -n ${CURRENT_BG} ]] print -n "%K{${CURRENT_BG}}%k"
-  print -n "${2}%s"
-  CURRENT_BG=${1}
+  if (( CATLINUX_FANCY_PROMPT == 0 )); then
+    if [[ -n ${CURRENT_BG} ]]; then
+      print -n "%F{white}|%f "
+    fi
+    print -n "%B%F{${1}}${2}%f%b "
+    CURRENT_BG=${1}
+  else
+    print -n "%S%F{${1}}"
+    if [[ -n ${CURRENT_BG} ]] print -n "%K{${CURRENT_BG}}%k"
+    print -n "${2}%s"
+    CURRENT_BG=${1}
+  fi
 }
 
 _prompt_agnoster_custom_segment() {
   local bg_color=$1
   local fg_color=$2
   local content=$3
-  print -n "%K{${bg_color}}"
-  if [[ -n ${CURRENT_BG} ]]; then
-    print -n "%F{${CURRENT_BG}}"
+  if (( CATLINUX_FANCY_PROMPT == 0 )); then
+    if [[ -n ${CURRENT_BG} ]]; then
+      print -n "%F{white}|%f "
+    fi
+    print -n "%F{${fg_color}} ${content} %f "
+    CURRENT_BG=${fg_color}
+  else
+    print -n "%K{${bg_color}}"
+    if [[ -n ${CURRENT_BG} ]]; then
+      print -n "%F{${CURRENT_BG}}"
+    fi
+    print -n "%F{${fg_color}}"
+    print -n " ${content} "
+    CURRENT_BG=${bg_color}
   fi
-  print -n "%F{${fg_color}}"
-  print -n " ${content} "
-  CURRENT_BG=${bg_color}
 }
 
 _prompt_agnoster_end() {
-  print -n "%k%F{${CURRENT_BG}}%f "
+  if (( CATLINUX_FANCY_PROMPT == 0 )); then
+    print -n "%f%# "
+  else
+    print -n "%k%F{${CURRENT_BG}}%f "
+  fi
 }
 
 _prompt_agnoster_status() {
@@ -122,15 +162,28 @@ _update_git_info() {
   fi
 
   local prompt
-  prompt=" ${branch}"
-  if (( indexed )); then prompt+=" ✚"; fi
-  if (( unindexed )); then prompt+=" \uf044"; fi
-  if (( ahead > 0 )); then prompt+=" ↑${ahead}"; fi
-  if (( behind > 0 )); then prompt+=" ↓${behind}"; fi
-  if (( stashed )); then
-    local stash_n
-    stash_n=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
-    prompt+=" ⍟${stash_n}"
+  if (( CATLINUX_FANCY_PROMPT == 0 )); then
+    prompt="${branch}"
+    if (( indexed )); then prompt+=" +"; fi
+    if (( unindexed )); then prompt+=" ~"; fi
+    if (( ahead > 0 )); then prompt+=" ahead:${ahead}"; fi
+    if (( behind > 0 )); then prompt+=" behind:${behind}"; fi
+    if (( stashed )); then
+      local stash_n
+      stash_n=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+      prompt+=" stash:${stash_n}"
+    fi
+  else
+    prompt=" ${branch}"
+    if (( indexed )); then prompt+=" ✚"; fi
+    if (( unindexed )); then prompt+=" \uf044"; fi
+    if (( ahead > 0 )); then prompt+=" ↑${ahead}"; fi
+    if (( behind > 0 )); then prompt+=" ↓${behind}"; fi
+    if (( stashed )); then
+      local stash_n
+      stash_n=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+      prompt+=" ⍟${stash_n}"
+    fi
   fi
 
   git_info=(
